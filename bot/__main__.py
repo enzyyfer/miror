@@ -31,101 +31,116 @@ async def stats(_, message):
     total, used, free, disk = disk_usage('/')
     swap = swap_memory()
     memory = virtual_memory()
-    stats = f'<b>Commit Date:</b> {last_commit}\n\n'\
-            f'<b>Bot Uptime:</b> {get_readable_time(time() - botStartTime)}\n'\
-            f'<b>OS Uptime:</b> {get_readable_time(time() - boot_time())}\n\n'\
-            f'<b>Total Disk Space:</b> {get_readable_file_size(total)}\n'\
-            f'<b>Used:</b> {get_readable_file_size(used)} | <b>Free:</b> {get_readable_file_size(free)}\n\n'\
-            f'<b>Upload:</b> {get_readable_file_size(net_io_counters().bytes_sent)}\n'\
-            f'<b>Download:</b> {get_readable_file_size(net_io_counters().bytes_recv)}\n\n'\
-            f'<b>CPU:</b> {cpu_percent(interval=0.5)}%\n'\
-            f'<b>RAM:</b> {memory.percent}%\n'\
-            f'<b>DISK:</b> {disk}%\n\n'\
-            f'<b>Physical Cores:</b> {cpu_count(logical=False)}\n'\
-            f'<b>Total Cores:</b> {cpu_count(logical=True)}\n\n'\
-            f'<b>SWAP:</b> {get_readable_file_size(swap.total)} | <b>Used:</b> {swap.percent}%\n'\
-            f'<b>Memory Total:</b> {get_readable_file_size(memory.total)}\n'\
-            f'<b>Memory Free:</b> {get_readable_file_size(memory.available)}\n'\
-            f'<b>Memory Used:</b> {get_readable_file_size(memory.used)}\n'
+    
+    stats = (
+        f"🔗 <b>Latest Commit:</b> {last_commit}\n\n"
+        f"⏲️ <b>Bot Uptime:</b> {get_readable_time(time() - botStartTime)}\n"
+        f"⌛️ <b>System Uptime:</b> {get_readable_time(time() - boot_time())}\n\n"
+        f"💾 <b>Total Disk Space:</b> {get_readable_file_size(total)}\n"
+        f"💿 <b>Used Disk Space:</b> {get_readable_file_size(used)} | <b>Free Disk Space:</b> {get_readable_file_size(free)}\n\n"
+        f"📤 <b>Uploaded Data:</b> {get_readable_file_size(net_io_counters().bytes_sent)}\n"
+        f"📥 <b>Downloaded Data:</b> {get_readable_file_size(net_io_counters().bytes_recv)}\n\n"
+        f"💻 <b>CPU Usage:</b> {cpu_percent(interval=0.5)}%\n"
+        f"🧠 <b>RAM Usage:</b> {memory.percent}%\n"
+        f"💽 <b>Storage Usage:</b> {disk}%\n\n"
+        f"🔢 <b>Physical Cores:</b> {cpu_count(logical=False)}\n"
+        f"🔢 <b>Total Cores:</b> {cpu_count(logical=True)}\n\n"
+        f"💼 <b>SWAP Usage:</b> {get_readable_file_size(swap.total)} | <b>Used SWAP:</b> {swap.percent}%\n"
+        f"📊 <b>Total Memory:</b> {get_readable_file_size(memory.total)}\n"
+        f"📈 <b>Free Memory:</b> {get_readable_file_size(memory.available)}\n"
+        f"📉 <b>Used Memory:</b> {get_readable_file_size(memory.used)}"
+    )
+    
     await sendMessage(message, stats)
+
 
 
 async def start(client, message):
     buttons = ButtonMaker()
-    buttons.ubutton(
-        "Repo", "https://www.github.com/anasty17/mirror-leech-telegram-bot")
-    buttons.ubutton("Owner", "https://t.me/anas_tayyar")
+    buttons.ubutton("🔗 Sharing Bot", "https://t.me/sharinguserbot")
+    buttons.ubutton("👤 Pemilik", "https://t.me/biduanonline")
+    buttons.ubutton("👥 Grup Support", "https://t.me/naberalmirror")
+    buttons.ubutton("💰 Donasi", "https://saweria.co/lyannn")
+    
     reply_markup = buttons.build_menu(2)
+    
     if await CustomFilters.authorized(client, message):
-        start_string = f'''
-This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.
-Type /{BotCommands.HelpCommand} to get a list of available commands
-'''
+        start_string = (
+            "🌟 Selamat datang di Bot Naberal Mirror! 🌟\n\n"
+            "Bot ini dapat melakukan mirror ke Telegram dan beberapa fitur yang keren.\n"
+            f"Ketik /{BotCommands.HelpCommand} untuk mendapatkan daftar perintah yang tersedia."
+        )
         await sendMessage(message, start_string, reply_markup)
     else:
-        await sendMessage(message, 'You Are not authorized user! Deploy your own mirror-leech bot', reply_markup)
+        await sendMessage(message, "⛔ Anda bukan pengguna yang diizinkan!\nDeploy bot Mirror Leech Anda sendiri untuk menikmati fiturnya.", reply_markup)
 
 
 async def restart(_, message):
-    restart_message = await sendMessage(message, "Restarting...")
+    pesan_restart = await sendMessage(message, "🔄 Sedang Merestart...")
     if scheduler.running:
         scheduler.shutdown(wait=False)
     for interval in [QbInterval, Interval]:
         if interval:
             interval[0].cancel()
     await sync_to_async(clean_all)
-    proc1 = await create_subprocess_exec('pkill', '-9', '-f', 'gunicorn|aria2c|qbittorrent-nox|ffmpeg|rclone')
-    proc2 = await create_subprocess_exec('python3', 'update.py')
-    await gather(proc1.wait(), proc2.wait())
+    proses1 = await create_subprocess_exec('pkill', '-9', '-f', 'gunicorn|aria2c|qbittorrent-nox|ffmpeg|rclone')
+    proses2 = await create_subprocess_exec('python3', 'update.py')
+    await gather(proses1.wait(), proses2.wait())
     async with aiopen(".restartmsg", "w") as f:
-        await f.write(f"{restart_message.chat.id}\n{restart_message.id}\n")
+        await f.write(f"{pesan_restart.chat.id}\n{pesan_restart.id}\n")
     osexecl(executable, executable, "-m", "bot")
+
 
 
 async def ping(_, message):
     start_time = int(round(time() * 1000))
-    reply = await sendMessage(message, "Starting Ping")
+    pesan_mulai = await sendMessage(message, "🏓 Memulai Ping")
     end_time = int(round(time() * 1000))
-    await editMessage(reply, f'{end_time - start_time} ms')
+    await editMessage(pesan_mulai, f'🏓 Ping: {end_time - start_time} ms')
+
 
 
 async def log(_, message):
     await sendFile(message, 'log.txt')
 
 help_string = f'''
-NOTE: Try each command without any argument to see more detalis.
-/{BotCommands.MirrorCommand[0]} or /{BotCommands.MirrorCommand[1]}: Start mirroring to Google Drive.
-/{BotCommands.QbMirrorCommand[0]} or /{BotCommands.QbMirrorCommand[1]}: Start Mirroring to Google Drive using qBittorrent.
-/{BotCommands.YtdlCommand[0]} or /{BotCommands.YtdlCommand[1]}: Mirror yt-dlp supported link.
-/{BotCommands.LeechCommand[0]} or /{BotCommands.LeechCommand[1]}: Start leeching to Telegram.
-/{BotCommands.QbLeechCommand[0]} or /{BotCommands.QbLeechCommand[1]}: Start leeching using qBittorrent.
-/{BotCommands.YtdlLeechCommand[0]} or /{BotCommands.YtdlLeechCommand[1]}: Leech yt-dlp supported link.
-/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive.
-/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive.
-/{BotCommands.DeleteCommand} [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo).
-/{BotCommands.UserSetCommand} [query]: Users settings.
-/{BotCommands.BotSetCommand} [query]: Bot settings.
-/{BotCommands.BtSelectCommand}: Select files from torrents by gid or reply.
-/{BotCommands.CancelMirror}: Cancel task by gid or reply.
-/{BotCommands.CancelAllCommand} [query]: Cancel all [status] tasks.
-/{BotCommands.ListCommand} [query]: Search in Google Drive(s).
-/{BotCommands.SearchCommand} [query]: Search for torrents with API.
-/{BotCommands.StatusCommand}: Shows a status of all the downloads.
-/{BotCommands.StatsCommand}: Show stats of the machine where the bot is hosted in.
-/{BotCommands.PingCommand}: Check how long it takes to Ping the Bot (Only Owner & Sudo).
-/{BotCommands.AuthorizeCommand}: Authorize a chat or a user to use the bot (Only Owner & Sudo).
-/{BotCommands.UnAuthorizeCommand}: Unauthorize a chat or a user to use the bot (Only Owner & Sudo).
-/{BotCommands.UsersCommand}: show users settings (Only Owner & Sudo).
-/{BotCommands.AddSudoCommand}: Add sudo user (Only Owner).
-/{BotCommands.RmSudoCommand}: Remove sudo users (Only Owner).
-/{BotCommands.RestartCommand}: Restart and update the bot (Only Owner & Sudo).
-/{BotCommands.LogCommand}: Get a log file of the bot. Handy for getting crash reports (Only Owner & Sudo).
-/{BotCommands.ShellCommand}: Run shell commands (Only Owner).
-/{BotCommands.EvalCommand}: Run Python Code Line | Lines (Only Owner).
-/{BotCommands.ExecCommand}: Run Commands In Exec (Only Owner).
-/{BotCommands.ClearLocalsCommand}: Clear {BotCommands.EvalCommand} or {BotCommands.ExecCommand} locals (Only Owner).
-/{BotCommands.RssCommand}: RSS Menu.
+📚 **Menu Bantuan**
+
+Catatan: Cobalah setiap perintah tanpa argumen untuk melihat detail lebih lanjut.
+
+📂 /{BotCommands.MirrorCommand[0]} atau /{BotCommands.MirrorCommand[1]}: Memulai pemindaian ke Google Drive.
+📂 /{BotCommands.QbMirrorCommand[0]} atau /{BotCommands.QbMirrorCommand[1]}: Memulai pemindaian ke Google Drive menggunakan qBittorrent.
+📺 /{BotCommands.YtdlCommand[0]} atau /{BotCommands.YtdlCommand[1]}: Memulai pemindaian tautan yang didukung oleh yt-dlp.
+📂 /{BotCommands.LeechCommand[0]} atau /{BotCommands.LeechCommand[1]}: Memulai mengecilkan ukuran ke Telegram.
+📂 /{BotCommands.QbLeechCommand[0]} atau /{BotCommands.QbLeechCommand[1]}: Memulai mengecilkan ukuran menggunakan qBittorrent.
+📺 /{BotCommands.YtdlLeechCommand[0]} atau /{BotCommands.YtdlLeechCommand[1]}: Mengecilkan ukuran tautan yang didukung oleh yt-dlp.
+📂 /{BotCommands.CloneCommand} [tautan_drive]: Menyalin berkas/folder ke Google Drive.
+📂 /{BotCommands.CountCommand} [tautan_drive]: Menghitung berkas/folder di Google Drive.
+📂 /{BotCommands.DeleteCommand} [tautan_drive]: Menghapus berkas/folder dari Google Drive (Hanya Pemilik & Sudo).
+👥 /{BotCommands.UserSetCommand} [kueri]: Pengaturan pengguna.
+🤖 /{BotCommands.BotSetCommand} [kueri]: Pengaturan bot.
+📂 /{BotCommands.BtSelectCommand}: Pilih berkas dari torrent berdasarkan gid atau balasan.
+📂 /{BotCommands.CancelMirror}: Batalkan tugas berdasarkan gid atau balasan.
+📂 /{BotCommands.CancelAllCommand} [kueri]: Batalkan semua tugas [status].
+📂 /{BotCommands.ListCommand} [kueri]: Cari di Google Drive.
+🔍 /{BotCommands.SearchCommand} [kueri]: Cari torrent dengan API.
+📂 /{BotCommands.StatusCommand}: Menampilkan status semua unduhan.
+📊 /{BotCommands.StatsCommand}: Menampilkan statistik mesin tempat bot dihosting.
+🏓 /{BotCommands.PingCommand}: Periksa berapa lama waktu yang dibutuhkan untuk melakukan Ping ke Bot (Hanya Pemilik & Sudo).
+🔑 /{BotCommands.AuthorizeCommand}: Menyetujui obrolan atau pengguna untuk menggunakan bot (Hanya Pemilik & Sudo).
+🚫 /{BotCommands.UnAuthorizeCommand}: Membatalkan persetujuan obrolan atau pengguna untuk menggunakan bot (Hanya Pemilik & Sudo).
+👥 /{BotCommands.UsersCommand}: menampilkan pengaturan pengguna (Hanya Pemilik & Sudo).
+🔒 /{BotCommands.AddSudoCommand}: Tambahkan pengguna sudo (Hanya Pemilik).
+🔓 /{BotCommands.RmSudoCommand}: Hapus pengguna sudo (Hanya Pemilik).
+🔄 /{BotCommands.RestartCommand}: Memulai ulang dan memperbarui bot (Hanya Pemilik & Sudo).
+📜 /{BotCommands.LogCommand}: Dapatkan file log bot. Berguna untuk mendapatkan laporan crash (Hanya Pemilik & Sudo).
+🛠️ /{BotCommands.ShellCommand}: Jalankan perintah shell (Hanya Pemilik).
+💡 /{BotCommands.EvalCommand}: Jalankan Kode Python Baris | Baris (Hanya Pemilik).
+📝 /{BotCommands.ExecCommand}: Jalankan Perintah Dalam Eksekusi (Hanya Pemilik).
+🧹 /{BotCommands.ClearLocalsCommand}: Bersihkan lokal {BotCommands.EvalCommand} atau {BotCommands.ExecCommand} (Hanya Pemilik).
+📰 /{BotCommands.RssCommand}: Menu RSS.
 '''
+
 
 
 async def bot_help(_, message):
@@ -139,9 +154,9 @@ async def restart_notification():
     else:
         chat_id, msg_id = 0, 0
 
-    async def send_incompelete_task_message(cid, msg):
+    async def send_incomplete_task_message(cid, msg):
         try:
-            if msg.startswith('Restarted Successfully!'):
+            if msg.startswith('✅ Berhasil Merestart!'):
                 await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=msg)
                 await aioremove(".restartmsg")
             else:
@@ -153,23 +168,24 @@ async def restart_notification():
     if INCOMPLETE_TASK_NOTIFIER and DATABASE_URL:
         if notifier_dict := await DbManger().get_incomplete_tasks():
             for cid, data in notifier_dict.items():
-                msg = 'Restarted Successfully!' if cid == chat_id else 'Bot Restarted!'
+                msg = '✅ Berhasil Merestart!' if cid == chat_id else '🔄 Bot Telah Merestart!'
                 for tag, links in data.items():
-                    msg += f"\n\n{tag}: "
+                    msg += f"\n\n📁 {tag}: "
                     for index, link in enumerate(links, start=1):
-                        msg += f" <a href='{link}'>{index}</a> |"
+                        msg += f" <a href='{link}'>#{index}</a> |"
                         if len(msg.encode()) > 4000:
-                            await send_incompelete_task_message(cid, msg)
+                            await send_incomplete_task_message(cid, msg)
                             msg = ''
                 if msg:
-                    await send_incompelete_task_message(cid, msg)
+                    await send_incomplete_task_message(cid, msg)
 
     if await aiopath.isfile(".restartmsg"):
         try:
-            await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text='Restarted Successfully!')
+            await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text='✅ Berhasil Merestart!')
         except:
             pass
         await aioremove(".restartmsg")
+
 
 
 async def main():
