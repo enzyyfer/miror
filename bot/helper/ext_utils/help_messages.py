@@ -143,4 +143,33 @@ Judul2 tautan -c perintah -inf xx -exf xx
 Judul3 tautan -c perintah -d rasio:waktu -z kata sandi
 
 -c perintah -up mrcc:remote:path/subdir -rcf --buffer-size:8M|key|key:value
--inf
+-inf Untuk filter kata-kata yang disertakan.
+-exf Untuk filter kata-kata yang tidak disertakan.
+
+Contoh: Judul https://www.rss-url.com inf: 1080 or 720 or 144p|mkv or mp4|hevc exf: flv or web|xxx
+Filter ini akan mengurai tautan yang judulnya berisi `(1080 or 720 or 144p) dan (mkv or mp4) dan hevc` dan tidak mengandung kata-kata `(flv or web) dan xxx`. Anda dapat menambahkan apa pun yang Anda inginkan.
+
+Contoh lain: inf:  1080  or 720p|.web. or .webrip.|hvec or x264. Ini akan mengurai judul yang berisi ( 1080  or 720p) dan (.web. or .webrip.) dan (hvec or x264). Saya telah menambahkan spasi sebelum dan setelah 1080 untuk menghindari pencocokan yang salah. Jika angka `10805695` ada dalam judul, maka akan cocok dengan 1080 jika ditambahkan 1080 tanpa spasi setelahnya.
+
+Catatan Filter:
+1. | berarti dan.
+2. Tambahkan `or` di antara kunci yang serupa, Anda dapat menambahkannya di antara kualitas atau di antara ekstensi, jadi jangan menambahkan filter seperti ini f: 1080|mp4 atau 720|web karena ini akan mengurai 1080 dan (mp4 or 720) dan web ... bukan (1080 dan mp4) atau (720 dan web).
+3. Anda dapat menambahkan `or` dan `|` sebanyak yang Anda inginkan.
+4. Periksa judul jika memiliki karakter khusus statis setelah atau sebelum kualitas atau ekstensi atau apa pun yang serupa dan gunakan dalam filter untuk menghindari pencocokan yang salah.
+Timeout: 60 detik.
+"""
+
+CLONE_HELP_MESSAGE = """
+Kirim tautan Gdrive|Gdot|Filepress|Filebee|Appdrive|Gdflix atau rclone path bersama dengan perintah atau dengan membalas tautan/rc_path dengan perintah.
+
+<b>Multi tautan hanya dengan membalas ke gdlink pertama atau rclone_path:</b>
+<code>/cmd</code> -i 10(jumlah tautan)
+
+<b>Gdrive:</b>
+<code>/cmd</code> gdrivelink/gdl/gdrive_id -up gdl/gdrive_id/gd
+
+<b>Rclone:</b>
+<code>/cmd</code> rcl/rclone_path -up rcl/rclone_path/rc -rcf flagkey:flagvalue|flagkey|flagkey:flagvalue
+
+Catatan: Jika -up tidak ditentukan maka destinasi rclone akan menjadi RCLONE_PATH dari config.env
+"""
